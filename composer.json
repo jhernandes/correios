@@ -20,7 +20,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Ipag\\": "src/Correios",
+            "Correios\\": "src/Correios",
             "Tests\\": "tests"
         }
     },
