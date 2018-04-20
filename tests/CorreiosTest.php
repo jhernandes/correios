@@ -58,7 +58,7 @@ class CorreiosTest extends TestCase
         $fretes = $correios->calculaFretes();
 
         $this->assertEquals(1, count($fretes));
-        $this->assertEquals('PAC', $fretes[0]['servico']);
+        $this->assertEquals('PAC', $fretes[0]->getServico());
     }
 
     public function testGetEmptyFretes()
@@ -83,5 +83,37 @@ class CorreiosTest extends TestCase
         $fretes = $correios->calculaFretes();
 
         $this->assertEmpty($fretes);
+    }
+
+    public function testGetErrosFromCorreios()
+    {
+        $cepOrigem = '19053210';
+        $cepDestino = '02881050';
+        $peso = 0.50;
+        $altura = 5;
+        $largura = 12;
+        $comprimento = 62;
+
+        $servicos = array(
+            Correios::SEDEX,
+            Correios::PAC,
+        );
+
+        $correios = new Correios(
+            $servicos,
+            $cepOrigem,
+            $cepDestino,
+            $peso,
+            $altura,
+            $largura,
+            $comprimento
+        );
+
+        $fretes = $correios->calculaFretes();
+
+        $this->assertEquals(2, count($fretes));
+        $this->assertEquals('Sedex', $fretes[0]->getServico());
+        $this->assertEquals('011', $fretes[0]->getErro());
+        $this->assertEquals('011', $fretes[1]->getErro());
     }
 }

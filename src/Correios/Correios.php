@@ -2,6 +2,8 @@
 
 namespace Correios;
 
+use Correios\Frete;
+
 class Correios
 {
     const PAC = '04510';
@@ -99,28 +101,37 @@ class Correios
         $fretes = array();
         if (is_array($correiosResponse->cServico)) {
             foreach ($correiosResponse->cServico as $cServico) {
-                if ($cServico->Erro == '0') {
-                    $fretes[] = array(
-                        'servico' => $this->getServicoByCorreiosCode($cServico->Codigo),
-                        'codigo'  => $cServico->Codigo,
-                        'valor'   => $this->strToNumber($cServico->Valor),
-                        'prazo'   => $cServico->PrazoEntrega.' Dias',
-                    );
+                if ($cServico->Valor > 0) {
+                    $fretes[] = $this->newFrete($cServico);
                 }
             }
         } else {
             $cServico = $correiosResponse->cServico;
-            if ($cServico->Erro == '0') {
-                $fretes[] = array(
-                    'servico' => $this->getServicoByCorreiosCode($cServico->Codigo),
-                    'codigo'  => $cServico->Codigo,
-                    'valor'   => $this->strToNumber($cServico->Valor),
-                    'prazo'   => $cServico->PrazoEntrega.' Dias',
-                );
+            if ($cServico->Valor > 0) {
+                $fretes[] = $this->newFrete($cServico);
             }
         }
 
         return $fretes;
+    }
+
+    private function newFrete($cServico)
+    {
+        $frete = (new Frete())
+            ->setServico($this->getServicoByCorreiosCode($cServico->Codigo))
+            ->setCodigo($cServico->Codigo)
+            ->setValor($cServico->Valor)
+            ->setPrazo($cServico->PrazoEntrega.' Dias')
+            ->setValorSemAdicionais($cServico->ValorSemAdicionais)
+            ->setValorMaoPropria($cServico->ValorMaoPropria)
+            ->setValorAvisoRecebimento($cServico->ValorAvisoRecebimento)
+            ->setValorDeclarado($cServico->ValorValorDeclarado)
+            ->setEntregaDomiciliar($cServico->EntregaDomiciliar)
+            ->setEntregaSabado($cServico->EntregaSabado)
+            ->setErro($cServico->Erro)
+            ->setMsgErro($cServico->MsgErro)
+            ->setObservacao($cServico->obsFim);
+        return $frete;
     }
 
     private function getServicoByCorreiosCode($code)
@@ -211,13 +222,6 @@ class Correios
     private function xmlToStdClass($xml)
     {
         return json_decode(json_encode((array) $xml));
-    }
-
-    private function strToNumber($number)
-    {
-        $number = (float) str_replace(',', '.', $number);
-
-        return number_format($number, 2, '.', '');
     }
 
     /**

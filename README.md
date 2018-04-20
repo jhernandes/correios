@@ -63,6 +63,13 @@ $fretes = $correios->calculaFretes();
 foreach($fretes as $frete) {
     print_r($frete);
 }
+
+// Para recuperar os dados do frete:
+
+$valor = $frete->getValor();
+$servico = $frete->getServico();
+$codigo = $frete->getCodigo();
+
 ```
 
 ## Testes
